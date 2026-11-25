@@ -371,13 +371,20 @@ built.append(page("index.html", "Home",
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow">{DESCRIPTOR}</span>
-      <h1>Build a stronger sales team. Reach more customers.</h1>
-      <p class="lead">We help growing businesses improve sales, expand distribution and strengthen daily operations through practical advice, training and hands-on support.</p>
+      <h1>We help businesses in Ghana sell more and reach more outlets.</h1>
+      <p class="lead">Sales plans, distribution, team training and part-time sales leadership, led by a founder with 17+ years in sales across FMCG, telecoms and energy.</p>
+      <ul class="hero-chips" aria-label="What we do">
+        <li><a href="sales-strategy-and-performance.html">{ICONS['target']}Sales plan &amp; targets</a></li>
+        <li><a href="distribution-and-market-expansion.html">{ICONS['pin']}Distribution &amp; dealers</a></li>
+        <li><a href="sales-training-and-coaching.html">{ICONS['users']}Sales team training</a></li>
+        <li><a href="part-time-sales-leadership.html">{ICONS['flag']}Part-time sales leadership</a></li>
+      </ul>
       <div class="btn-row">
         {consult()}
         <a class="btn btn-light" href="services.html">Explore Our Services</a>
       </div>
       <p class="hero-wa">Prefer to chat? {wa(label="Message us on WhatsApp", cls="")}</p>
+      <p class="hero-for">For business owners, manufacturers, importers and distributors.</p>
     </div>
     <figure class="hero-founder">
       {photo()}
