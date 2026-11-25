@@ -220,7 +220,7 @@ def page(filename, title, description, body, form=False):
         </ul>
       </div>
     </div>
-    <div class="copy">&copy; {YEAR} {NAME}. All rights reserved.</div>
+    <div class="copy">&copy; {YEAR} {NAME}. All rights reserved. Photos: <a href="https://unsplash.com" rel="noopener">Unsplash</a>.</div>
   </div>
 </footer>
 <div class="mobile-bar">
@@ -246,6 +246,34 @@ SERVICE_ART = {
     "part-time-sales-leadership": "compass",
     "retail-operations-and-systems": "grid",
 }
+
+
+# Stock photos (Unsplash License: free to use, credit appreciated). See CREDITS.md.
+# name -> (alt text, width, height of the 1200px file)
+PHOTOS = {
+    "home-markets": ("Aerial view of a busy open-air market with rows of stalls and umbrellas", 1200, 900),
+    "home-routes": ("A loaded blue truck on a city road", 1200, 800),
+    "home-shop": ("A shopkeeper standing at the entrance of his shop", 1200, 845),
+    "sales-strategy": ("A team around a meeting table with laptops", 1200, 801),
+    "distribution": ("A motorised cart piled high with goods on a busy street", 1200, 784),
+    "training": ("Colleagues looking at a laptop together", 1200, 800),
+    "leadership": ("A small group in discussion in a modern room", 1200, 1546),
+    "retail": ("A shop assistant at the counter of a well-stocked store", 1200, 800),
+}
+SERVICE_PHOTO = {
+    "sales-strategy-and-performance": "sales-strategy",
+    "distribution-and-market-expansion": "distribution",
+    "sales-training-and-coaching": "training",
+    "part-time-sales-leadership": "leadership",
+    "retail-operations-and-systems": "retail",
+}
+
+
+def photo_img(name, sizes="(max-width: 760px) 100vw, 600px", eager=False):
+    alt, w, h = PHOTOS[name]
+    load = 'fetchpriority="high"' if eager else 'loading="lazy"'
+    return (f'<img src="assets/photos/{name}.jpg" srcset="assets/photos/{name}-sm.jpg 640w, assets/photos/{name}.jpg 1200w" '
+            f'sizes="{sizes}" width="{w}" height="{h}" alt="{escape(alt)}" {load} decoding="async">')
 
 
 def service_tabs():
@@ -430,6 +458,17 @@ built.append(page("index.html", "Home",
   </div>
 </section>
 
+<section class="scenes">
+  <div class="wrap">
+    <h2>Where the work happens</h2>
+    <div class="scene-grid">
+      <figure class="scene">{photo_img("home-markets", "(max-width: 760px) 100vw, 380px")}<figcaption>Markets and outlets</figcaption></figure>
+      <figure class="scene">{photo_img("home-routes", "(max-width: 760px) 100vw, 380px")}<figcaption>Routes and distribution</figcaption></figure>
+      <figure class="scene">{photo_img("home-shop", "(max-width: 760px) 100vw, 380px")}<figcaption>Shops and counters</figcaption></figure>
+    </div>
+  </div>
+</section>
+
 <section class="svc-tabs-section">
   <div class="wrap">
     <h2>Our services</h2>
@@ -539,6 +578,7 @@ for n, s in enumerate(SERVICES, 1):
 <section>
   <div class="wrap svc-body">
     <div class="svc-main">
+      <figure class="svc-photo">{photo_img(SERVICE_PHOTO[s['slug']], "(max-width: 760px) 100vw, 720px")}</figure>
       <div class="grid g2 benefits svc-intro">
         <div class="card"><span class="icon">{ICONS['users']}</span><h3>Who it is for</h3><p>{escape(s['for'])}</p></div>
         <div class="card"><span class="icon">{ICONS['alert']}</span><h3>The problem</h3><p>{escape(s['problem'])}</p></div>
@@ -832,7 +872,14 @@ self.addEventListener('fetch', e => {{
     return;
   }}
   // files: cached copy first (their names change when they change)
-  e.respondWith(caches.match(req).then(r => r || fetch(req)));
+  e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => {{
+    // photos are cached the first time they are seen, so they work offline after
+    if (res.ok && req.url.includes('/assets/photos/')) {{
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(req, copy));
+    }}
+    return res;
+  }})));
 }});
 """, encoding="utf-8")
 

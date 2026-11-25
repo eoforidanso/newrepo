@@ -72,7 +72,7 @@
   // Skipped when the visitor has asked for reduced motion.
   if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     var items = document.querySelectorAll(
-      'main h2, .card, .problem, .tile, .proof-grid, .founder-visual, .svc-tabs, .do-list li, .next-panel, .dark .wrap');
+      'main h2, .card, .problem, .tile, .proof-grid, .founder-visual, .svc-tabs, .do-list li, .next-panel, .dark .wrap, .scene, .svc-photo');
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (en.isIntersecting) { en.target.classList.add('shown'); io.unobserve(en.target); }
