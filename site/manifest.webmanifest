@@ -1,0 +1,39 @@
+{
+  "name": "Enterprise Foundation Solutions",
+  "short_name": "EFS",
+  "description": "Sales, Distribution and Business Growth Services",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f2a47",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Request a Consultation",
+      "url": "contact.html#enquiry-form"
+    },
+    {
+      "name": "Our Services",
+      "url": "services.html"
+    }
+  ]
+}

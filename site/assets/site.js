@@ -9,6 +9,13 @@
   var FORM_ENDPOINT = '';
   // -------------------------------------------------------------------------
 
+  // Installable app: offline support (needs https or localhost)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
+
   // Mobile menu
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('site-nav');
