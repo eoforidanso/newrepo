@@ -14,6 +14,8 @@ OUT = ROOT / "site"  # the folder that gets published
 import hashlib
 def _ver(name):
     return hashlib.md5((OUT / "assets" / name).read_bytes()).hexdigest()[:8]
+import art
+art.generate(OUT / "assets" / "art")
 CSS_VER, JS_VER = _ver("site.css"), _ver("site.js")
 SITE_URL = "https://thepowerofus.us"
 
@@ -237,6 +239,15 @@ def ticks(items):
     return '<ul class="ticks">' + "".join(f"<li>{escape(i)}</li>" for i in items) + "</ul>"
 
 
+SERVICE_ART = {
+    "sales-strategy-and-performance": "growth",
+    "distribution-and-market-expansion": "network",
+    "sales-training-and-coaching": "people",
+    "part-time-sales-leadership": "compass",
+    "retail-operations-and-systems": "grid",
+}
+
+
 def service_tabs():
     """Homepage services as 3D tabs over a glass panel.
     Without JavaScript every panel shows, one after another."""
@@ -249,7 +260,7 @@ def service_tabs():
             f'<span class="svc-tab-num">{i:02d}</span><span class="svc-tab-name">{escape(s["short"])}</span></button>')
         chips = "".join(f"<li>{escape(g)}</li>" for g in s["get"])
         does = "".join(f"<li>{escape(d)}</li>" for d in s["do"])
-        panels.append(f"""<div class="svc-panel" role="tabpanel" id="panel-{s['slug']}" aria-labelledby="tab-{s['slug']}" tabindex="0">
+        panels.append(f"""<div class="svc-panel art-{SERVICE_ART[s['slug']]}" role="tabpanel" id="panel-{s['slug']}" aria-labelledby="tab-{s['slug']}" tabindex="0">
   <div class="svc-panel-main">
     <p class="svc-panel-kicker">{escape(s['benefit'])}</p>
     <h3>{escape(s['title'].capitalize())}</h3>
@@ -367,7 +378,7 @@ built = []
 built.append(page("index.html", "Home",
     "Enterprise Foundation Solutions helps growing businesses in Ghana improve sales, expand distribution and strengthen daily operations through practical advice, sales training and hands-on support.",
     f"""
-<section class="hero">
+<section class="hero art-network">
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow">{DESCRIPTOR}</span>
@@ -487,7 +498,7 @@ built.append(page("index.html", "Home",
 built.append(page("services.html", "Services",
     "Sales strategy, distribution and market expansion, sales training, part-time sales leadership and retail operations support for growing businesses in Ghana.",
     f"""
-<section class="page-hero">
+<section class="page-hero art-network">
   <div class="wrap">
     <span class="eyebrow">Services</span>
     <h1>Practical support for growing businesses</h1>
@@ -517,7 +528,7 @@ for n, s in enumerate(SERVICES, 1):
     tiles = "".join(f'<div class="tile"><span class="tile-icon">{ICONS["doc"]}</span><span>{escape(g)}</span></div>' for g in s["get"])
     built.append(page(f"{s['slug']}.html", s["title"].capitalize(), s["seo"],
         f"""
-<section class="page-hero">
+<section class="page-hero art-{SERVICE_ART[s['slug']]}">
   <div class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="services.html">Services</a><span aria-hidden="true">/</span><span>{n:02d} of {len(SERVICES):02d}</span></nav>
     <h1>{escape(s['title'].capitalize())}</h1>
@@ -564,7 +575,7 @@ for n, s in enumerate(SERVICES, 1):
 built.append(page("about.html", "About Us",
     f"About {NAME}: a practical business growth partner in Ghana founded by {FOUNDER}, a sales and operations leader with more than 17 years of experience.",
     f"""
-<section class="page-hero">
+<section class="page-hero art-compass">
   <div class="wrap">
     <span class="eyebrow">About us</span>
     <h1>A practical business growth partner</h1>
@@ -636,7 +647,7 @@ FAQ = [
 built.append(page("how-we-work.html", "How We Work",
     "How Enterprise Foundation Solutions works with clients: initial discussion, assessment and proposal, practical implementation and coaching, and regular progress reviews.",
     f"""
-<section class="page-hero">
+<section class="page-hero art-growth">
   <div class="wrap">
     <span class="eyebrow">How we work</span>
     <h1>A clear process, agreed with you</h1>
@@ -668,7 +679,7 @@ options = "".join(f'<option value="{s["slug"]}">{escape(s["title"].capitalize())
 built.append(page("contact.html", "Contact",
     f"Request a consultation with {NAME}. Call or WhatsApp {PHONE_DISPLAY}, email {EMAIL}, or tell us your challenge using the short enquiry form.",
     f"""
-<section class="page-hero">
+<section class="page-hero art-people">
   <div class="wrap">
     <span class="eyebrow">Contact</span>
     <h1>Tell us how we can help</h1>
@@ -728,7 +739,7 @@ built.append(page("contact.html", "Contact",
 built.append(page("privacy.html", "Privacy notice",
     f"How {NAME} collects, uses and protects the personal details you share with us.",
     f"""
-<section class="page-hero">
+<section class="page-hero art-grid">
   <div class="wrap"><h1>Privacy notice</h1></div>
 </section>
 <section>
@@ -791,7 +802,7 @@ precache = ["./"] + built + [
     f"assets/site.css?v={CSS_VER}", f"assets/site.js?v={JS_VER}",
     "assets/favicon.svg", "assets/icon-192.png", "assets/icon-512.png",
     "assets/apple-touch-icon.png", "manifest.webmanifest",
-] + (["assets/founder.jpg"] if HAS_PHOTO else [])
+] + [f"assets/art/{n}.svg" for n in art.PIECES] + (["assets/founder.jpg"] if HAS_PHOTO else [])
 h = hashlib.md5()
 for f in sorted(p for p in OUT.rglob("*") if p.is_file() and p.name != "sw.js"):
     h.update(f.read_bytes())
