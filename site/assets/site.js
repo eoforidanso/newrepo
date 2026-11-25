@@ -16,6 +16,58 @@
     });
   }
 
+  // "Install the app" card. Sits above the bottom action bar so nothing covers it.
+  // Android/desktop Chrome: uses the browser's install prompt.
+  // iPhone/iPad Safari: no prompt exists, so it shows the Add to Home Screen steps.
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    var KEY = 'efs-install-dismissed';
+    var dismissed = +localStorage.getItem(KEY) || 0;
+    if (standalone || Date.now() - dismissed < 14 * 864e5) return;
+    var ua = navigator.userAgent;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var iosSafari = ios && !/CriOS|FxiOS|EdgiOS|GSA\//.test(ua);
+    var deferred = null;
+
+    function show() {
+      if (document.querySelector('.install-card')) return;
+      var card = document.createElement('div');
+      card.className = 'install-card';
+      card.setAttribute('role', 'dialog');
+      card.setAttribute('aria-label', 'Install the app');
+      card.innerHTML =
+        '<img src="assets/icon-192.png" alt="" width="44" height="44">' +
+        '<div class="install-text"><strong>Get the EFS app</strong><span>' +
+        (deferred ? 'Quick access from your home screen, even offline.'
+          : 'Tap <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Share"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> Share, then <b>Add to Home Screen</b>.') +
+        '</span></div>' +
+        (deferred ? '<button class="btn btn-primary install-go" type="button">Install</button>' : '') +
+        '<button class="install-x" type="button" aria-label="Not now">&times;</button>';
+      document.body.appendChild(card);
+      document.body.classList.add('has-install');
+      requestAnimationFrame(function () { card.classList.add('in'); });
+      function close() {
+        localStorage.setItem(KEY, Date.now());
+        card.remove(); document.body.classList.remove('has-install');
+      }
+      card.querySelector('.install-x').addEventListener('click', close);
+      var go = card.querySelector('.install-go');
+      if (go) go.addEventListener('click', function () {
+        deferred.prompt();
+        deferred.userChoice.then(function () { deferred = null; close(); });
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault(); deferred = e; setTimeout(show, 1500);
+    });
+    window.addEventListener('appinstalled', function () {
+      var c = document.querySelector('.install-card'); if (c) c.remove();
+      document.body.classList.remove('has-install');
+    });
+    if (iosSafari) setTimeout(show, 2500);
+  })();
+
   // Mobile menu
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('site-nav');
