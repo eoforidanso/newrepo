@@ -670,10 +670,9 @@ main section.svc-tabs-section > .wrap > h2{color:#fff}
 
 .svc-panel[hidden]{display:none}
 
-/* Contact page: centre the "Prefer to talk?" block and privacy note on phones */
+/* Side panels (contact + service pages): centred on phones */
 @media (max-width:600px){
-  .aside:has(.contact-rows) .list-title,
-  .aside:has(.contact-rows) .privacy-box{text-align:center}
-  .contact-rows a{justify-content:center;text-align:center;padding:16px}
-  .contact-rows svg{display:none}
+  .aside{text-align:center}
+  .aside .list-rows a{justify-content:center;text-align:center;padding:16px}
+  .aside .list-rows svg{display:none}
 }
