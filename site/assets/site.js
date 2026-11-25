@@ -1,0 +1,198 @@
+/* Enterprise Foundation Solutions — site script */
+(function () {
+  // ---- Settings the owner/developer can change ---------------------------
+  var BUSINESS_EMAIL = 'Kofiyeboah05@yahoo.com';
+  var WHATSAPP_NUMBER = '233244802816'; // 0244 802 816 in international format
+  // Paste a form-service endpoint here (e.g. Formspree, Basin, Web3Forms) so
+  // enquiries are saved and emailed. Left empty, the form opens a pre-filled
+  // email in the visitor's mail app instead.
+  var FORM_ENDPOINT = '';
+  // -------------------------------------------------------------------------
+
+  // Mobile menu
+  var toggle = document.querySelector('.nav-toggle');
+  var nav = document.getElementById('site-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function () {
+      var open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      document.body.classList.toggle('menu-open', open);
+    });
+  }
+
+  // WhatsApp links carry a draft message; the visitor chooses to send it.
+  document.querySelectorAll('[data-wa]').forEach(function (a) {
+    var topic = a.getAttribute('data-wa');
+    var text = 'Hello Enterprise Foundation Solutions, I would like to discuss ' +
+      (topic ? 'your ' + topic + ' service.' : 'how you can help my business.');
+    a.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(text);
+    a.target = '_blank';
+    a.rel = 'noopener';
+  });
+
+  // Contact-link click counts (no personal data). Hook into analytics later.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a');
+    if (!a) return;
+    var kind = a.href.indexOf('wa.me') > -1 ? 'whatsapp_click'
+      : a.href.indexOf('tel:') === 0 ? 'call_click'
+      : a.href.indexOf('mailto:') === 0 ? 'email_click'
+      : a.classList.contains('cta-consult') ? 'consultation_click' : null;
+    if (kind && window.gtag) window.gtag('event', kind, { page: location.pathname });
+  });
+
+  // ---- Service tabs (homepage) ----------------------------------------
+  document.querySelectorAll('[data-tabs]').forEach(function (root) {
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[role=tab]'));
+    var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+    root.classList.add('js');
+    function select(i, focus) {
+      tabs.forEach(function (t, j) {
+        var on = j === i;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        panels[j].hidden = !on;
+        panels[j].classList.toggle('enter', on);
+      });
+      if (focus) tabs[i].focus();
+      // keep the active tab visible in the scrolling row on phones
+      var list = tabs[i].parentNode;
+      list.scrollTo({ left: tabs[i].offsetLeft - (list.clientWidth - tabs[i].offsetWidth) / 2, behavior: 'smooth' });
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(i, false); });
+      t.addEventListener('keydown', function (e) {
+        var k = e.key, n = tabs.length, to = null;
+        if (k === 'ArrowRight') to = (i + 1) % n;
+        else if (k === 'ArrowLeft') to = (i - 1 + n) % n;
+        else if (k === 'Home') to = 0;
+        else if (k === 'End') to = n - 1;
+        if (to !== null) { e.preventDefault(); select(to, true); }
+      });
+    });
+    select(0, false);
+  });
+
+  // ---- Enquiry form ------------------------------------------------------
+  var form = document.getElementById('enquiry');
+  if (!form) return;
+
+  var params = new URLSearchParams(location.search);
+  var svc = params.get('service');
+  var select = form.querySelector('#service');
+  if (svc && select) {
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === svc) select.value = svc;
+    }
+  }
+  var src = form.querySelector('#source');
+  if (src) src.value = params.get('from') || document.referrer || '';
+
+  function field(id) { return form.querySelector('#' + id); }
+  function setInvalid(id, bad) {
+    var el = field(id); if (!el) return;
+    el.closest('.field').classList.toggle('invalid', bad);
+    el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  }
+  function validate() {
+    var ok = true;
+    ['name', 'business', 'service', 'challenge'].forEach(function (id) {
+      var bad = !field(id).value.trim(); setInvalid(id, bad); if (bad) ok = false;
+    });
+    var email = field('email').value.trim();
+    var phone = field('phone').value.trim();
+    var emailBad = email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    var phoneBad = phone && phone.replace(/[^\d]/g, '').length < 9;
+    var none = !email && !phone;
+    setInvalid('email', none || emailBad);
+    setInvalid('phone', none || phoneBad);
+    var contactErr = document.getElementById('contact-err');
+    contactErr.style.display = none ? 'block' : 'none';
+    if (none || emailBad || phoneBad) ok = false;
+    return ok;
+  }
+
+  var status = document.getElementById('form-status');
+  var btn = form.querySelector('button[type=submit]');
+  var sending = false;
+
+  function show(html, cls) {
+    status.className = 'alert ' + cls;
+    status.innerHTML = html;
+    status.hidden = false;
+    status.focus();
+  }
+  function ref() {
+    var d = new Date();
+    return 'EFS-' + d.getFullYear().toString().slice(2) +
+      ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '-' +
+      Math.random().toString(36).slice(2, 6).toUpperCase();
+  }
+  function summary(data, reference) {
+    return [
+      'Reference: ' + reference,
+      'Name: ' + data.name,
+      'Business: ' + data.business,
+      'Email: ' + (data.email || '-'),
+      'Phone: ' + (data.phone || '-'),
+      'Service needed: ' + data.service,
+      'Location: ' + (data.location || '-'),
+      'Preferred contact: ' + (data.contact_method || '-'),
+      'Timing: ' + (data.timing || '-'),
+      '',
+      'Main challenge:',
+      data.challenge
+    ].join('\n');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sending) return;
+    if (form.querySelector('.hp input').value) return; // spam trap
+    if (!validate()) {
+      show('Please check the highlighted fields.', 'alert-bad');
+      var first = form.querySelector('.invalid input, .invalid select, .invalid textarea');
+      if (first) first.focus();
+      return;
+    }
+    var data = {};
+    new FormData(form).forEach(function (v, k) { data[k] = String(v).trim(); });
+    var reference = ref();
+    data.reference = reference;
+
+    if (!FORM_ENDPOINT) {
+      var subject = 'Consultation request: ' + data.service + ' (' + data.business + ')';
+      location.href = 'mailto:' + BUSINESS_EMAIL + '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(summary(data, reference));
+      show('<strong>Your email app should now open with your request filled in.</strong> ' +
+        'Please press <em>Send</em> there to complete it. Reference: <strong>' + reference + '</strong>.<br>' +
+        'If nothing opened, email <a href="mailto:' + BUSINESS_EMAIL + '">' + BUSINESS_EMAIL + '</a>, ' +
+        'call <a href="tel:+233244802816">0244 802 816</a> or ' +
+        '<a href="https://wa.me/' + WHATSAPP_NUMBER + '" target="_blank" rel="noopener">chat on WhatsApp</a>.',
+        'alert-ok');
+      return;
+    }
+
+    sending = true; btn.disabled = true; btn.textContent = 'Sending…';
+    fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('bad status');
+      form.reset();
+      form.hidden = true;
+      show('<strong>Thank you. Your request has been received.</strong> Our team will contact you to discuss the next step.' +
+        '<br>Your reference number is <strong>' + reference + '</strong>.', 'alert-ok');
+      if (window.gtag) window.gtag('event', 'enquiry_submitted', { service: data.service });
+    }).catch(function () {
+      show('<strong>Sorry, your request could not be sent.</strong> Your details are still in the form, so you can try again. ' +
+        'Or call <a href="tel:+233244802816">0244 802 816</a>, ' +
+        '<a href="https://wa.me/' + WHATSAPP_NUMBER + '" target="_blank" rel="noopener">chat on WhatsApp</a> or email ' +
+        '<a href="mailto:' + BUSINESS_EMAIL + '">' + BUSINESS_EMAIL + '</a>.', 'alert-bad');
+    }).then(function () {
+      sending = false; btn.disabled = false; btn.textContent = 'Send my request';
+    });
+  });
+})();

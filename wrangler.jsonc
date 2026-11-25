@@ -1,0 +1,17 @@
+{
+  // Serves the site/ folder from a Cloudflare Worker.
+  // Deploy with:  python3 build.py && npx wrangler deploy
+  "name": "enterprise-foundation-solutions",
+  "compatibility_date": "2026-11-24",
+  "assets": {
+    "directory": "./site"
+  },
+  // The zone is on this Cloudflare account, so the deploy attaches these
+  // domains and writes the DNS records itself. They were previously attached
+  // to the "dremmanuelopoku" Worker (the campaign site, ~/Desktop/owass/site);
+  // that Worker must release them first or this deploy will refuse.
+  "routes": [
+    { "pattern": "thepowerofus.us", "custom_domain": true },
+    { "pattern": "www.thepowerofus.us", "custom_domain": true }
+  ]
+}
