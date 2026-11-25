@@ -68,6 +68,28 @@
     if (iosSafari) setTimeout(show, 2500);
   })();
 
+  // Scroll-in motion: cards and headings ease up as they come into view.
+  // Skipped when the visitor has asked for reduced motion.
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var items = document.querySelectorAll(
+      'main h2, .card, .problem, .tile, .proof-grid, .founder-visual, .svc-tabs, .do-list li, .next-panel, .dark .wrap');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('shown'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    items.forEach(function (el) {
+      // anything already on screen at load shows at once; siblings stagger
+      var r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0) return;
+      var sibs = el.parentNode ? Array.prototype.indexOf.call(el.parentNode.children, el) : 0;
+      el.style.setProperty('--d', Math.min(sibs, 4) * 0.07 + 's');
+      el.classList.add('reveal');
+      io.observe(el);
+    });
+    document.documentElement.classList.add('js-reveal');
+  }
+
   // Mobile menu
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.getElementById('site-nav');

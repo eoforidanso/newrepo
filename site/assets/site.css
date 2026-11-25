@@ -708,3 +708,90 @@ main section.svc-tabs-section > .wrap > h2{color:#fff}
   .hero-for{text-align:center}
 }
 @media (prefers-reduced-motion:reduce){.hero-chips a{transition:none}}
+
+/* =====================================================================
+   Apple-grade glass layer
+   A soft colour wash sits behind the page so frosted cards have
+   something to blur; cards, buttons and type get one consistent finish.
+   ===================================================================== */
+:root{
+  --glass-bg:rgba(255,255,255,.62);
+  --glass-border:rgba(255,255,255,.8);
+  --glass-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 2px rgba(15,42,71,.04),0 12px 32px rgba(15,42,71,.08);
+  --glass-shadow-hover:inset 0 1px 0 rgba(255,255,255,.95),0 2px 4px rgba(15,42,71,.05),0 24px 48px rgba(15,42,71,.14);
+  --spring:cubic-bezier(.2,.8,.2,1);
+}
+body{
+  background:
+    radial-gradient(52vw 52vw at 8% 18%,rgba(31,138,134,.10),transparent 62%),
+    radial-gradient(46vw 46vw at 94% 46%,rgba(56,112,214,.08),transparent 62%),
+    radial-gradient(40vw 40vw at 30% 88%,rgba(31,138,134,.07),transparent 62%),
+    #f6f8fb;
+  background-attachment:fixed;
+}
+section:not(.hero):not(.page-hero):not(.svc-tabs-section),
+.alt,.trust,.proof,.alt + .dark{background:transparent}
+
+/* type */
+h1{letter-spacing:-.032em;font-weight:700}
+h2{letter-spacing:-.025em}
+h3{letter-spacing:-.012em}
+h1,h2,h3{text-wrap:balance}
+p,li{text-wrap:pretty}
+
+/* frosted cards */
+.card,.problem,.proof-grid,.tile,.aside,.list-rows,.privacy-box,.contact-rows{
+  background:var(--glass-bg);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow);
+}
+.card,.problem{border-radius:22px}
+.problem{border-left:1px solid var(--glass-border);position:relative;overflow:hidden}
+.problem::before{content:"";position:absolute;left:0;top:22px;bottom:22px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(var(--teal),#5ed6cf)}
+.proof-grid{border-radius:24px;background:rgba(255,255,255,.72)}
+.proof-grid div{border-left-color:rgba(15,42,71,.07)}
+.tile{border-radius:16px}
+.list-rows li+li{border-top-color:rgba(15,42,71,.07)}
+.list-rows a:hover{background:rgba(255,255,255,.6)}
+.card,.problem,.tile{
+  transition:opacity .8s var(--spring),translate .8s var(--spring),transform .45s var(--spring),box-shadow .45s var(--spring);
+  transition-delay:var(--d,0s),var(--d,0s),0s,0s;
+}
+@media (hover:hover){
+  .card:hover,.problem:hover,.tile:hover{transform:translateY(-4px);box-shadow:var(--glass-shadow-hover)}
+}
+
+/* pill buttons with a soft highlight */
+.btn{border-radius:999px;transition:transform .25s var(--spring),box-shadow .25s var(--spring),background-color .2s}
+.btn-primary{background:linear-gradient(180deg,#24a09a 0%,var(--teal) 100%);border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 6px 16px rgba(31,138,134,.28)}
+.btn-primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 24px rgba(31,138,134,.36)}
+.btn:active{transform:scale(.97)}
+section:not(.hero):not(.page-hero):not(.dark):not(.svc-tabs-section) .btn-light{background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.mobile-bar .btn{border-radius:999px}
+.install-go{border-radius:999px}
+
+/* closing call-to-action panel: glass edge on navy */
+.dark .wrap{border:1px solid rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 30px 60px rgba(15,42,71,.22)}
+.dark .wrap::before{content:"";position:absolute;left:-160px;bottom:-200px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(56,112,214,.28) 0%,rgba(56,112,214,0) 70%);pointer-events:none}
+.next-panel{border:1px solid rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 24px 50px rgba(15,42,71,.18)}
+
+/* founder photo: glass frame */
+.founder-visual .photo{outline:1px solid rgba(255,255,255,.7);outline-offset:-1px}
+
+/* scroll-in motion (added by site.js; content is visible without JS) */
+.js-reveal .reveal{opacity:0;translate:0 22px}
+.js-reveal .reveal.shown{opacity:1;translate:0 0}
+.js-reveal .reveal:not(.card):not(.problem):not(.tile){transition:opacity .8s var(--spring),translate .8s var(--spring);transition-delay:var(--d,0s)}
+
+@media (prefers-reduced-motion:reduce){
+  .js-reveal .reveal{opacity:1;translate:none}
+  .card,.problem,.tile,.btn{transition:none}
+}
+/* light-on-dark buttons inside navy panels keep their outline style */
+.next-panel .btn-light,.dark .btn-light{background:rgba(255,255,255,.06)!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+.next-panel .btn-light:hover,.dark .btn-light:hover{background:rgba(255,255,255,.14)!important}
+@media (max-width:600px){
+  .aside{background:transparent;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+}
